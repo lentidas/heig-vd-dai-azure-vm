@@ -1,0 +1,79 @@
+---
+- name: Configure SSH keys and install required packages
+  hosts: all
+  remote_user: ubuntu
+  become: true
+
+  tasks:
+    - name: Add our SSH keys to the authorized keys
+      ansible.builtin.blockinfile:
+        block: "{{ lookup('file', './files/authorized_keys') }}"
+        dest: /home/ubuntu/.ssh/authorized_keys
+        create: true
+        backup: true
+        owner: ubuntu
+        group: ubuntu
+        mode: '0600'
+
+    - name: Ensure all packages are updated
+      ansible.builtin.apt:
+        upgrade: dist
+        update_cache: true
+        cache_valid_time: 3600
+        force_apt_get: true
+
+    - name: Install required packages for Docker
+      ansible.builtin.apt:
+        name: "{{ item }}"
+        state: present
+        update_cache: true
+      with_items:
+        - apt-transport-https
+        - ca-certificates
+        - curl
+        - gnupg
+        - lsb-release
+        - tmux
+
+    - name: Add Docker's repository
+      ansible.builtin.deb822_repository:
+        name: docker
+        types: [deb]
+        uris:
+          - https://download.docker.com/linux/ubuntu
+        signed_by: https://download.docker.com/linux/ubuntu/gpg
+        suites: ["{{ ansible_distribution_release | lower }}"]
+        components:
+          - stable
+        state: present
+        enabled: true
+
+    - name: Install Docker and Docker Compose
+      ansible.builtin.apt:
+        name: "{{ item }}"
+        state: present
+        update_cache: true
+      with_items:
+        - docker-ce
+        - docker-ce-cli
+        - containerd.io
+        - docker-buildx-plugin
+        - docker-compose-plugin
+
+    - name: Create 'docker' group
+      ansible.builtin.group:
+        name: docker
+        state: present
+
+    - name: Add 'ubuntu' user to 'docker' group
+      ansible.builtin.user:
+        name: ubuntu
+        groups: docker
+        append: true
+
+    - name: Start Docker service
+      ansible.builtin.systemd:
+        name: docker
+        state: started
+        enabled: true
+
