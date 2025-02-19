@@ -43,7 +43,9 @@ Infrastructure as Code (IaC) is the practice of managing and provisioning comput
 GitOps is a set of practices that uses Git as the single source of truth for declarative infrastructure and applications. It leverages Git repositories to manage infrastructure and application configurations, enabling version control, collaboration, and automation.
 
 > [!NOTE]
-> Although GitOps concepts is more commonly associated with Kubernetes and cloud-native applications, we can apply it in this case if we are using ONLY GitHub actions to deploy the infrastructure. As soon as we start running Terraform and Ansible locally, we are not following the GitOps principles anymore and we risk having discrepancies between multiple team members (*imagine if someone forgets to commit their changes, someone else runs a `terraform apply` and overwrites their configurations!*).
+> Although GitOps concepts are more commonly associated with Kubernetes and cloud-native applications, we can apply it in this case if we are using ONLY GitHub actions to deploy the infrastructure.
+> 
+> However, as soon as we start running Terraform and Ansible locally, we are not following the GitOps principles anymore and we risk having discrepancies between multiple team members (*imagine if someone forgets to commit their changes, someone else runs a `terraform apply` and overwrites their configurations!*).
 
 ### Terraform state
 
