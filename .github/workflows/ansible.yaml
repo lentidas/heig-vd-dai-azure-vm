@@ -43,4 +43,4 @@
         env:
           ANSIBLE_HOST_KEY_CHECKING: false
         run: |
-          ansible-playbook -i dns-domain-prefix-project-name.cloudapp.azure.com, -u ubuntu ansible-playbook.yml
+          ansible-playbook -i dns-domain-prefix-project-name.westeurope.cloudapp.azure.com, -u ubuntu ansible-playbook.yml
