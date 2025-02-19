@@ -123,6 +123,7 @@ In order to use GitHub Actions to run Terraform, you need to store the Terraform
 
     ```terraform
     # ...
+
     provider "azurerm" {
       features {}
       subscription_id = "<SUBSCRIPTION_ID>"
@@ -160,6 +161,24 @@ In order to authenticate with Azure from GitHub Actions, you need to create an A
 
 ## Create a SSH key pair
 
+You probably already have a SSH key pair for your personal use. However, I recommend creating a new one here, as this private key will be used by GitHub Actions to connect to the virtual machine and run the Ansible playbook for the first time.
+
+It's only after this first run that you can connect to the virtual machine using your personal SSH key (*more on this later*).
+
+1. Create a new SSH key pair without a passphrase:
+
+    ```bash
+   ssh-keygen -t ed25519 -f ~/.ssh/id_ed25529_azure_deploy_key -C 'admin@azure-for-students'
+    ```
+
+    This command will create a new SSH key pair with
+    - the private key at `~/.ssh/id_ed25529_azure_deploy_key`
+    - the public key at `~/.ssh/id_ed25529_azure_deploy_key.pub`
+    - the comment `admin@azure-for-students`
+
+> [!IMPORTANT]
+> Do not use a passphrase for this SSH key pair, because you'll not have a way to input it when GitHub Actions tries to connect to run the Ansible playbook.
+
 ## Add the required secrets to your GitHub repository
 
 In order to run the GitHub Actions workflows, you need to add secrets from the Azure Service Principal and the SSH key pair to your GitHub repository.
@@ -169,7 +188,7 @@ In order to run the GitHub Actions workflows, you need to add secrets from the A
 2. Add the following secrets:
 
     - `ARM_CLIENT_SECRET`: the password of the Azure Service Principal.
-    - `SSH_PRIVATE_KEY`: the private key of the SSH key pair.
+    - `SSH_PRIVATE_KEY`: the **private key** of the SSH key pair.
 
 3. Add the following variables:
    
@@ -180,8 +199,8 @@ In order to run the GitHub Actions workflows, you need to add secrets from the A
 ## Final adjustments
 
 1. Modify the `terraform.tfvars` file in the `terraform` directory to include the values of the variables you want to use.
-   - It's important to include the public key of the SSH key pair in the `admin_ssh_public_ke` variable, as this will be the key used by the Ansible workflow that you'll run after the Terraform workflow.
-   - The `public_ip_label_prefix` variable is used to create a unique label for the public IP resource. This will automatically create a unique DNS name for the public IP, which is useful for accessing the virtual machine (see [here](https://learn.microsoft.com/en-us/azure/virtual-network/ip-services/public-ip-addresses#domain-name-label) and [here](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/public_ip#domain_name_label-1)).
+   - It's important to include the **public key** of the SSH key pair in the `admin_ssh_public_key` variable, as this will be the key used by the Ansible workflow that you'll run after the Terraform workflow.
+   - The `app_name` and `public_ip_label_prefix` variables are used to create a unique label for the public IP resource. This will automatically create a unique DNS name for the public IP, which is useful for accessing the virtual machine (see [here](https://learn.microsoft.com/en-us/azure/virtual-network/ip-services/public-ip-addresses#domain-name-label) and [here](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/public_ip#domain_name_label-1)). Note that if `public_ip_label_prefix`, the domain host will be the `app_name` only.
 
 2. Modify the `authorized_keys` file in the `ansible` directory to include any other public keys you might want to include (such as your personal one and the ones from your colleagues). The keys from the teaching staff are already included.
 
@@ -189,7 +208,7 @@ In order to run the GitHub Actions workflows, you need to add secrets from the A
 
 4. Modify the working directory on the `ansible.yaml` workflow file in the `.github/workflows` directory to match the path where your Ansible code is located.
 
-5. Modify the hostname of the virtual machine in the `ansible.yaml` workflow file in the `.github/workflows` directory to match the DNS name you set in the `public_ip_label_prefix` variable (the comma at the end is important!).
+5. Modify the hostname of the virtual machine in the `ansible.yaml` workflow file in the `.github/workflows` directory to match the DNS name you will get from concatenating the values set in the `app_name` and `public_ip_label_prefix` variables (the comma at the end is important!).
 
 6. Commit everything to your repository and push it to GitHub.
 
@@ -205,11 +224,11 @@ Now you can provision the infrastructure by running the GitHub Actions workflows
 
 ## Access the virtual machine
 
-After the `ansible` workflow has finished running, you can access the virtual machine using the public IP address that was created (check your Azure portal) or the DNS name that was created (the one you set in the `public_ip_label_prefix` variable).
+After the `ansible` workflow has finished running, you can access the virtual machine using the public IP address that was created (check your Azure portal) or the DNS name that was created (the one you set in the `app_name` variable prefixed with the value of `public_ip_label_prefix`, if defined).
 
 ```bash
-ssh ubuntu@<YOUR-APP-NAME>.<LOCATION>.cloudapp.azure.com
+ssh ubuntu@<DNS_DOMAIN_PREFIX>-<APP-NAME>.<LOCATION>.cloudapp.azure.com
 
 # Example:
-ssh ubuntu@my-app.westeurope.cloudapp.azure.com
+ssh ubuntu@prefix-app-name.westeurope.cloudapp.azure.com
 ```
