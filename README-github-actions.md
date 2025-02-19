@@ -14,6 +14,7 @@
   - [Final adjustments](#final-adjustments)
   - [Provision the infrastructure](#provision-the-infrastructure)
   - [Access the virtual machine](#access-the-virtual-machine)
+  - [Destroy the infrastructure](#destroy-the-infrastructure)
 
 ## Get the configuration files
 
@@ -232,3 +233,12 @@ ssh ubuntu@<DNS_DOMAIN_PREFIX>-<APP-NAME>.<LOCATION>.cloudapp.azure.com
 # Example:
 ssh ubuntu@prefix-app-name.westeurope.cloudapp.azure.com
 ```
+
+## Destroy the infrastructure
+
+After the course is done, you can destroy the infrastructure by running the `terraform` workflow with the `destroy` action. This will delete all the resources created on Azure.
+
+And that's it! You can now manage the infrastructure for the HEIG-VD DAI course through GitHub Actions.
+
+> [!NOTE]
+> If you want, a quick and dirty way to destroy the infrastructure is to delete the resource group that contains all the resources. This will delete everything in one go. You can do that through the Azure portal or using the Azure CLI: `az group delete --name <RESOURCE_GROUP_NAME> --yes`
