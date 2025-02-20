@@ -15,6 +15,7 @@
   - [Provision the infrastructure](#provision-the-infrastructure)
   - [Access the virtual machine](#access-the-virtual-machine)
   - [Destroy the infrastructure](#destroy-the-infrastructure)
+  - [Conclusion](#conclusion)
 
 ## Get the configuration files
 
@@ -36,7 +37,6 @@ Next, make sure you have the following tools installed:
 > Personally, I like to use [Homebrew](https://brew.sh/) to install these tools on macOS or Linux (or WSL in Windows) with the command `brew tap hashicorp/tap && brew install hashicorp/tap/terraform ansible azure-cli`.
 
 ## Azure CLI preparations
-
 
 1. Log in to your Azure account (if you haven't already):
 
@@ -238,7 +238,9 @@ ssh ubuntu@prefix-app-name.westeurope.cloudapp.azure.com
 
 After the course is done, you can destroy the infrastructure by running the `terraform` workflow with the `destroy` action. This will delete all the resources created on Azure.
 
-And that's it! You can now manage the infrastructure for the HEIG-VD DAI course through GitHub Actions.
-
 > [!NOTE]
-> If you want, a quick and dirty way to destroy the infrastructure is to delete the resource group that contains all the resources. This will delete everything in one go. You can do that through the Azure portal or using the Azure CLI: `az group delete --name <RESOURCE_GROUP_NAME> --yes`
+> If you want, a quick and dirty way to destroy the infrastructure is to delete the resource group that contains all the resources. This will delete everything in one go, however, **your Terraform state will no longer be in sync with the actual resources of your infrastructure**. You can do that through the Azure portal or using the Azure CLI: `az group delete --name <RESOURCE_GROUP_NAME> --yes`
+
+## Conclusion
+
+And that's it! You can now manage the infrastructure for the HEIG-VD DAI course through GitHub Actions.
